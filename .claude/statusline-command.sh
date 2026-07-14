@@ -25,7 +25,7 @@ parsed=$(printf '%s' "$input" | "$PY" -c '
 import sys, json, datetime
 
 try:
-    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stdout.reconfigure(encoding="utf-8", newline="\n")
 except Exception:
     pass
 

@@ -20,7 +20,7 @@ input=$(cat)
 # Pick an available python
 PY=$(command -v python || command -v python3)
 
-# --- Parse everything in one python call -> tab-separated: model, cwd, ctx_str, cost_str, rate_str
+# --- Parse everything in one python call -> \x1f-separated: model, cwd, ctx_str, cost_str, rate_str
 parsed=$(printf '%s' "$input" | "$PY" -c '
 import sys, json, datetime
 
@@ -33,7 +33,7 @@ except Exception:
 try:
     d = json.load(sys.stdin)
 except Exception:
-    print("Claude\t\t\t\t")
+    print("Claude\x1f\x1f\x1f\x1f")
     sys.exit(0)
 
 def g(*keys, default=None):
@@ -99,10 +99,11 @@ if week is not None:
     rate_bits.append(f"7d [{bar(week)}] {float(week):.0f}%")
 rate_str = "  ".join(rate_bits)
 
-print("\t".join([model, cwd, ctx_str, cost_str, rate_str]))
+print("\x1f".join([model, cwd, ctx_str, cost_str, rate_str]))
 ')
 
-IFS=$'\t' read -r model cwd ctx_str cost_str rate_str <<< "$parsed"
+# Unit separator (non-whitespace) so empty fields are not collapsed by read
+IFS=$'\x1f' read -r model cwd ctx_str cost_str rate_str <<< "$parsed"
 
 # --- Working directory ---
 [ -z "$cwd" ] && cwd="$PWD"

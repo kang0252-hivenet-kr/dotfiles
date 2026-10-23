@@ -26,6 +26,12 @@ Opus 4.8 (1M context) | MacroScheduler (master) | Ctx [░░░░░░░░�
 The renderer parses the status line JSON with **python3** (not `jq`). Requirements on
 any machine: **Git Bash** (the command runs via `bash`) and **python** on `PATH`.
 
+> **Windows:** a fresh install only has the Microsoft Store stub
+> (`%LOCALAPPDATA%\Microsoft\WindowsApps\python.exe`), which prints `Python` instead of
+> running anything — the status line then shows just `Python | <dir>`. Install real
+> Python (e.g. the python.org installer with *Add to PATH*) so it comes first on `PATH`,
+> then restart Claude Code.
+
 ## Set up on a NEW machine
 
 ```sh
@@ -41,9 +47,23 @@ cd ~/dotfiles && bash install.sh
 # 3. Restart Claude Code.
 ```
 
-> The `statusLine.command` in `settings.json` points at
-> `~/dotfiles/.claude/statusline-command.sh`, so the repo **must live at `~/dotfiles`**.
-> Cloning elsewhere means editing that path in `.claude/settings.json`.
+### Cloning somewhere other than `~/dotfiles`
+
+The `statusLine.command` in `.claude/settings.json` points at
+`~/dotfiles/.claude/statusline-command.sh`, and the status line script is referenced from
+the repo directly (not copied). If the repo lives elsewhere, skip the install script and
+add the `statusLine` entry to `~/.claude/settings.json` by hand, using the repo's real
+path in Git Bash form. For example, with the repo at `C:\intellij-workspace\dotfiles`:
+
+```json
+"statusLine": {
+  "type": "command",
+  "command": "bash /c/intellij-workspace/dotfiles/.claude/statusline-command.sh"
+}
+```
+
+Adding the entry by hand also keeps any other keys already in `~/.claude/settings.json`;
+the install scripts replace the whole file (keeping a one-time `settings.json.bak`).
 
 ## Save local changes back (this machine is the source of truth)
 
@@ -57,7 +77,9 @@ git commit -m "Update status line"
 git push
 ```
 
-If you changed `~/.claude/settings.json` directly instead, copy it back first:
+If you changed `~/.claude/settings.json` directly instead, copy it back first (if your
+local `statusLine.command` uses a non-`~/dotfiles` path, change it back to
+`~/dotfiles/...` before committing):
 
 ```sh
 cp ~/.claude/settings.json ~/dotfiles/.claude/settings.json

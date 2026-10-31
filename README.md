@@ -16,7 +16,7 @@ install.sh                # Apply on Git Bash / macOS / Linux
 Shows, with progress bars, in the Claude Code bottom bar:
 
 ```
-Opus 4.8 (1M context) | MacroScheduler (master) | Ctx [░░░░░░░░░░] 4% (40K/1M) | $0.49 | 5h [███░░░░░░░] 28%(->13:40)  7d [██░░░░░░░░] 21%
+Opus 4.8 (1M context) | MacroScheduler (master) | Ctx [░░░░░░░░░░] 4% (40K/1M) | $0.49 | 5h [███░░░░░░░] 28%(->13:40)  7d [██░░░░░░░░] 21%(->11/03 09:00)
 ```
 
 - **Ctx** — context/token usage (used % + used/total tokens)

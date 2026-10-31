@@ -10,7 +10,7 @@
 #   .context_window.used_percentage / .total_input_tokens / .context_window_size
 #   .cost.total_cost_usd
 #   .rate_limits.five_hour.used_percentage / .resets_at
-#   .rate_limits.seven_day.used_percentage
+#   .rate_limits.seven_day.used_percentage / .resets_at
 #
 # NOTE: rate_limits is only populated for Claude.ai subscribers (Pro/Max) and
 # only after the session's first API response.
@@ -83,20 +83,23 @@ cost = g("cost", "total_cost_usd")
 cost_str = f"${float(cost):.2f}" if cost is not None else ""
 
 # --- 5h / 7d subscription windows ---
-five  = g("rate_limits", "five_hour", "used_percentage")
+def reset_suffix(ts, fmt):
+    if ts is None:
+        return ""
+    try:
+        return "(->" + datetime.datetime.fromtimestamp(int(ts)).strftime(fmt) + ")"
+    except Exception:
+        return ""
+
+five   = g("rate_limits", "five_hour", "used_percentage")
 freset = g("rate_limits", "five_hour", "resets_at")
-week  = g("rate_limits", "seven_day", "used_percentage")
+week   = g("rate_limits", "seven_day", "used_percentage")
+wreset = g("rate_limits", "seven_day", "resets_at")
 rate_bits = []
 if five is not None:
-    s = f"5h [{bar(five)}] {float(five):.0f}%"
-    if freset is not None:
-        try:
-            s += "(->" + datetime.datetime.fromtimestamp(int(freset)).strftime("%H:%M") + ")"
-        except Exception:
-            pass
-    rate_bits.append(s)
+    rate_bits.append(f"5h [{bar(five)}] {float(five):.0f}%" + reset_suffix(freset, "%H:%M"))
 if week is not None:
-    rate_bits.append(f"7d [{bar(week)}] {float(week):.0f}%")
+    rate_bits.append(f"7d [{bar(week)}] {float(week):.0f}%" + reset_suffix(wreset, "%m/%d %H:%M"))
 rate_str = "  ".join(rate_bits)
 
 print("\x1f".join([model, cwd, ctx_str, cost_str, rate_str]))

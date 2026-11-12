@@ -92,7 +92,8 @@ if ctx_pct is not None:
 
 # --- session cost ---
 cost = g("cost", "total_cost_usd")
-cost_str = f"${float(cost):.2f}" if cost is not None else ""
+GOLD = rgb("#ffd700")
+cost_str = f"{GOLD}${float(cost):.2f}{RESET}" if cost is not None else ""
 
 # --- 5h / 7d subscription windows ---
 def reset_suffix(ts, fmt):

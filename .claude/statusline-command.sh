@@ -45,11 +45,21 @@ def g(*keys, default=None):
             return default
     return cur
 
-def bar(pct, width=10):
+# Color by usage level (Tokyo Night truecolor): green < 50%, yellow 50-79%, red >= 80%
+def rgb(hex_):
+    r, g, b = (int(hex_[i:i + 2], 16) for i in (1, 3, 5))
+    return f"\033[38;2;{r};{g};{b}m"
+
+GREEN, YELLOW, RED = rgb("#9ece6a"), rgb("#e0af68"), rgb("#f7768e")
+DIM, RESET = rgb("#565f89"), "\033[0m"
+
+def meter(pct, width=10):
+    # "[filled empty] NN%" with the level color; empty cells dimmed gray
     pct = float(pct)
-    filled = int(round(pct / 100 * width))
-    filled = max(0, min(width, filled))
-    return "█" * filled + "░" * (width - filled)
+    color = RED if pct >= 80 else YELLOW if pct >= 50 else GREEN
+    filled = max(0, min(width, int(round(pct / 100 * width))))
+    full, empty = "█" * filled, "░" * (width - filled)
+    return f"{color}[{full}{DIM}{empty}{color}] {pct:.0f}%{RESET}"
 
 def human(n):
     try:
@@ -73,7 +83,7 @@ size    = g("context_window", "context_window_size")
 ctx_str = ""
 if ctx_pct is not None:
     pct = float(ctx_pct)
-    ctx_str = f"Ctx [{bar(pct)}] {pct:.0f}%"
+    ctx_str = "Ctx " + meter(pct)
     ht, hs = human(in_tok), human(size)
     if ht and hs:
         ctx_str += f" ({ht}/{hs})"
@@ -97,9 +107,9 @@ week   = g("rate_limits", "seven_day", "used_percentage")
 wreset = g("rate_limits", "seven_day", "resets_at")
 rate_bits = []
 if five is not None:
-    rate_bits.append(f"5h [{bar(five)}] {float(five):.0f}%" + reset_suffix(freset, "%H:%M"))
+    rate_bits.append("5h " + meter(five) + reset_suffix(freset, "%H:%M"))
 if week is not None:
-    rate_bits.append(f"7d [{bar(week)}] {float(week):.0f}%" + reset_suffix(wreset, "%m/%d %H:%M"))
+    rate_bits.append("7d " + meter(week) + reset_suffix(wreset, "%m/%d %H:%M"))
 rate_str = "  ".join(rate_bits)
 
 print("\x1f".join([model, cwd, ctx_str, cost_str, rate_str]))

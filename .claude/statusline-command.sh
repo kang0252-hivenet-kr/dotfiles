@@ -74,7 +74,8 @@ def human(n):
     return str(n)
 
 model = g("model", "display_name") or g("model", "id") or "Claude"
-model = f"{GREEN}{model}{RESET}"
+PINK = rgb("#ff007c")  # Tokyo Night neon pink
+model = f"{PINK}{model}{RESET}"
 cwd   = g("workspace", "current_dir") or g("cwd") or ""
 
 # --- context / token usage ---
@@ -129,9 +130,14 @@ if git -C "$cwd" --no-optional-locks rev-parse --is-inside-work-tree >/dev/null 
   branch=$(git -C "$cwd" --no-optional-locks rev-parse --abbrev-ref HEAD 2>/dev/null)
 fi
 
+# --- Colors for folder / branch (truecolor) ---
+FOLDER_C=$'\033[38;2;90;125;255m'    # #5a7dff navy accent
+BRANCH_C=$'\033[38;2;64;224;208m'    # #40e0d0 turquoise
+RST=$'\033[0m'
+
 # --- Assemble ---
-line="$model | $dir_name"
-[ -n "$branch" ]   && line="$line ($branch)"
+line="$model | ${FOLDER_C}${dir_name}${RST}"
+[ -n "$branch" ]   && line="$line ${BRANCH_C}($branch)${RST}"
 [ -n "$ctx_str" ]  && line="$line | $ctx_str"
 [ -n "$cost_str" ] && line="$line | $cost_str"
 [ -n "$rate_str" ] && line="$line | $rate_str"

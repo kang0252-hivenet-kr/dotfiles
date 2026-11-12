@@ -74,6 +74,7 @@ def human(n):
     return str(n)
 
 model = g("model", "display_name") or g("model", "id") or "Claude"
+model = f"{GREEN}{model}{RESET}"
 cwd   = g("workspace", "current_dir") or g("cwd") or ""
 
 # --- context / token usage ---

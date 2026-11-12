@@ -52,6 +52,7 @@ def rgb(hex_):
 
 GREEN, YELLOW, RED = rgb("#9ece6a"), rgb("#e0af68"), rgb("#f7768e")
 DIM, RESET = rgb("#565f89"), "\033[0m"
+TOKEN_C = rgb("#9aa5ce")  # token count "(used/size)": blue-gray
 
 def meter(pct, width=10):
     # "[filled empty] NN%" with the level color; empty cells dimmed gray
@@ -88,7 +89,7 @@ if ctx_pct is not None:
     ctx_str = "Ctx " + meter(pct)
     ht, hs = human(in_tok), human(size)
     if ht and hs:
-        ctx_str += f" ({ht}/{hs})"
+        ctx_str += f" {TOKEN_C}({ht}/{hs}){RESET}"
 
 # --- session cost ---
 cost = g("cost", "total_cost_usd")

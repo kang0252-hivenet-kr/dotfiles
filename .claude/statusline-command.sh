@@ -53,6 +53,10 @@ def rgb(hex_):
 GREEN, YELLOW, RED = rgb("#9ece6a"), rgb("#e0af68"), rgb("#f7768e")
 DIM, RESET = rgb("#565f89"), "\033[0m"
 TOKEN_C = rgb("#9aa5ce")  # token count "(used/size)": blue-gray
+LABEL_C = rgb("#a9b1d6")  # meter labels Ctx / 5h / 7d: light gray
+
+def label(name):
+    return f"{LABEL_C}{name}{RESET} "
 
 def meter(pct, width=10):
     # "[filled empty] NN%" with the level color; empty cells dimmed gray
@@ -86,7 +90,7 @@ size    = g("context_window", "context_window_size")
 ctx_str = ""
 if ctx_pct is not None:
     pct = float(ctx_pct)
-    ctx_str = "Ctx " + meter(pct)
+    ctx_str = label("Ctx") + meter(pct)
     ht, hs = human(in_tok), human(size)
     if ht and hs:
         ctx_str += f" {TOKEN_C}({ht}/{hs}){RESET}"
@@ -101,7 +105,8 @@ def reset_suffix(ts, fmt):
     if ts is None:
         return ""
     try:
-        return "(->" + datetime.datetime.fromtimestamp(int(ts)).strftime(fmt) + ")"
+        when = datetime.datetime.fromtimestamp(int(ts)).strftime(fmt)
+        return f"{TOKEN_C}(->{when}){RESET}"
     except Exception:
         return ""
 
@@ -111,9 +116,9 @@ week   = g("rate_limits", "seven_day", "used_percentage")
 wreset = g("rate_limits", "seven_day", "resets_at")
 rate_bits = []
 if five is not None:
-    rate_bits.append("5h " + meter(five) + reset_suffix(freset, "%H:%M"))
+    rate_bits.append(label("5h") + meter(five) + reset_suffix(freset, "%H:%M"))
 if week is not None:
-    rate_bits.append("7d " + meter(week) + reset_suffix(wreset, "%m/%d %H:%M"))
+    rate_bits.append(label("7d") + meter(week) + reset_suffix(wreset, "%m/%d %H:%M"))
 rate_str = "  ".join(rate_bits)
 
 print("\x1f".join([model, cwd, ctx_str, cost_str, rate_str]))
@@ -136,12 +141,13 @@ fi
 FOLDER_C=$'\033[38;2;90;125;255m'    # #5a7dff navy accent
 BRANCH_C=$'\033[38;2;64;224;208m'    # #40e0d0 turquoise
 RST=$'\033[0m'
+SEP=" "$'\033[38;2;86;95;137m'"|${RST} "  # #565f89 gray separator
 
 # --- Assemble ---
-line="$model | ${FOLDER_C}${dir_name}${RST}"
+line="${model}${SEP}${FOLDER_C}${dir_name}${RST}"
 [ -n "$branch" ]   && line="$line ${BRANCH_C}($branch)${RST}"
-[ -n "$ctx_str" ]  && line="$line | $ctx_str"
-[ -n "$cost_str" ] && line="$line | $cost_str"
-[ -n "$rate_str" ] && line="$line | $rate_str"
+[ -n "$ctx_str" ]  && line="${line}${SEP}${ctx_str}"
+[ -n "$cost_str" ] && line="${line}${SEP}${cost_str}"
+[ -n "$rate_str" ] && line="${line}${SEP}${rate_str}"
 
 echo "$line"
